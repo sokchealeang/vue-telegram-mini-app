@@ -1,20 +1,36 @@
 <script setup lang="ts">
-import { computed } from 'vue';
-import { routes } from '@/router';
-import AppPage from '@/components/AppPage.vue';
-import AppLink from '@/components/AppLink.vue';
+import { computed, onMounted, ref } from "vue";
+import { routes } from "@/router";
+import AppPage from "@/components/AppPage.vue";
+import AppLink from "@/components/AppLink.vue";
+import { isTMA } from "@telegram-apps/sdk-vue";
+
+const isTelegram = ref(false);
 
 const nonIndexRoutes = computed(() => routes.filter((r) => !!r.meta?.title));
+const userAgent = computed(() => navigator.userAgent);
+
+async function checkTelegram() {
+  isTelegram.value = await isTMA();
+}
+
+onMounted(checkTelegram);
 </script>
 
 <template>
   <AppPage title="Home Page" :back="false">
+    <p>{{ `${isTelegram}` ? "From Telegram" : "From Web" }}</p>
+    <p>User Agent: {{ userAgent }}</p>
     <p>
-      This page is a home page in this boilerplate. You can use the links below to visit other
-      pages with their own functionality.
+      This page is a home page in this boilerplate. You can use the links below
+      to visit other pages with their own functionality.
     </p>
     <ul class="index-page__links">
-      <li v-for="route in nonIndexRoutes" :key="route.name" class="index-page__link-item">
+      <li
+        v-for="route in nonIndexRoutes"
+        :key="route.name"
+        class="index-page__link-item"
+      >
         <AppLink class="index-page__link" :to="{ name: route.name }">
           <i v-if="route.meta?.icon" class="index-page__link-icon">
             <component :is="route.meta.icon" />
@@ -38,7 +54,7 @@ const nonIndexRoutes = computed(() => routes.filter((r) => !!r.meta?.title));
   gap: 5px;
 }
 
-.index-page__link-item+.index-page__link-item {
+.index-page__link-item + .index-page__link-item {
   margin-top: 10px;
 }
 
